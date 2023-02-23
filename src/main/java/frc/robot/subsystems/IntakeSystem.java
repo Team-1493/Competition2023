@@ -60,19 +60,16 @@ public class IntakeSystem extends SubsystemBase {
     });
   }
 
-  public CommandBase RunFrontIntake() {
-    return runOnce(() -> {
-      FrontIntakeBar.set(ControlMode.PercentOutput, frontIntakePower);
-    });
+  public void runFrontIntakeBack() {
+
+      FrontIntakeBar.set(ControlMode.PercentOutput, -frontIntakePower);
   }
 
-  public CommandBase IntakeCube() {
-    return runOnce(() -> {
+  public void IntakeCube() {
       TopConveyor.set(ControlMode.Velocity, topConveyorSpeed);
       BotConveyor.set(ControlMode.Velocity, botConveyorSpeed);
       FrontIntakeBar.set(ControlMode.PercentOutput, frontIntakePower);
       RearIntakeBars.set(ControlMode.PercentOutput, rearIntakePower);
-    });
   }
 
   public CommandBase GrabCone() {

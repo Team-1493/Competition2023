@@ -7,16 +7,17 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.IntakeSystem;
 
-public class Intake extends CommandBase {
+public class CubeIntake extends CommandBase {
   @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
  
 
-    private double intakeTargetPos;
+    private double intakeTargetPos = 1350;
     private double intakeThreshold;
     private ArmSubsystem m_ArmSubsystem;
     private IntakeSystem m_IntakeSystem;
+    CommandBase intakecube;
 
-  public Intake(ArmSubsystem arm,IntakeSystem intake) {
+  public CubeIntake(ArmSubsystem arm,IntakeSystem intake) {
     m_ArmSubsystem = arm;
     m_IntakeSystem = intake;
     SmartDashboard.putNumber("Intake Arm Target", intakeTargetPos);
@@ -28,24 +29,23 @@ public class Intake extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intakeTargetPos = SmartDashboard.getNumber("Stow Arm Target", intakeTargetPos);
+    intakeTargetPos = SmartDashboard.getNumber("Intake Arm Target", intakeTargetPos);
     intakeThreshold = SmartDashboard.getNumber("Intake Start Threshold", intakeThreshold);
     m_ArmSubsystem.setTgtPositionInCounts(intakeTargetPos);
+    m_IntakeSystem.IntakeCube();
 
   }
 
   // Called every time the scheduler runs while the command is schedule d.
   @Override
   public void execute() {
-    if (m_ArmSubsystem.getCounts() > intakeThreshold){
-        m_IntakeSystem.IntakeCube();
-    }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_IntakeSystem.StopMotors();
+    m_IntakeSystem.StopMotors().schedule();
+    m_ArmSubsystem.StopMotors();
   }
 
   // Returns true when the command should end.

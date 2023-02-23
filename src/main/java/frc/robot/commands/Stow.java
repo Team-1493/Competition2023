@@ -11,7 +11,7 @@ public class Stow extends CommandBase {
   @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
  
 
-    private double stowTargetPos;
+    private double stowTargetPos = 1241;
     private double stowThreshold;
     private double stowFinishPos; // when this is reached it's safe to assume we are stowed
     private ArmSubsystem m_ArmSubsystem;
@@ -20,9 +20,9 @@ public class Stow extends CommandBase {
   public Stow(ArmSubsystem arm,IntakeSystem intake) {
     m_ArmSubsystem = arm;
     m_IntakeSystem = intake;
-    SmartDashboard.putNumber("Stow Arm Target", stowTargetPos);
-    SmartDashboard.putNumber("Stow Stage2 Threshold", stowThreshold);
-    SmartDashboard.putNumber("Stow Finish Position", stowFinishPos);
+    SmartDashboard.putNumber("Stow Arm Target", SmartDashboard.getNumber("Stow Arm Target", stowTargetPos));
+    SmartDashboard.putNumber("Stow Stage2 Threshold", SmartDashboard.getNumber("Stow Stage2 Threshold", stowThreshold));
+    SmartDashboard.putNumber("Stow Finish Position", SmartDashboard.getNumber("Stow Finish Position", stowFinishPos));
 
     addRequirements(arm,intake);
   }
@@ -33,28 +33,31 @@ public class Stow extends CommandBase {
     stowTargetPos = SmartDashboard.getNumber("Stow Arm Target", stowTargetPos);
     stowThreshold = SmartDashboard.getNumber("Stow Stage2 Threshold", stowThreshold);
     stowFinishPos = SmartDashboard.getNumber("Stow Finish Position", stowFinishPos);
-    m_ArmSubsystem.setTgtPositionInCounts(stowTargetPos);
+    m_ArmSubsystem.setTgtPositionInCounts(1500);
+    m_IntakeSystem.runFrontIntakeBack();
 
   }
 
   // Called every time the scheduler runs while the command is schedule d.
   @Override
   public void execute() {
-    if (m_ArmSubsystem.getCounts() > stowThreshold){
-        m_IntakeSystem.RunFrontIntake();
-    }
+
+    // if (m_ArmSubsystem.getCounts() < stowThreshold){
+    // }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_IntakeSystem.StopMotors();
+    m_ArmSubsystem.StopMotors();
+    m_IntakeSystem.StopMotors().schedule();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_ArmSubsystem.getCounts() >= stowFinishPos;
+    System.out.println(m_ArmSubsystem.getCounts());
+    return m_ArmSubsystem.getCounts() <= stowFinishPos;
   }
 }
 
