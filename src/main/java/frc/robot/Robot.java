@@ -21,9 +21,10 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
   private static final String kAuto1 = "Auto 1";
   private static final String kAuto2 = "Auto 2";
+  private static final String kAuto3 = "Auto 3";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  Command auto1Command, auto2Command;
+  Command auto1Command, auto2Command, auto3Command;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -35,8 +36,10 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     auto1Command=m_robotContainer.getAutonomousCommand1();
     auto2Command=m_robotContainer.getAutonomousCommand2();
+    auto3Command=m_robotContainer.getAutonomousCommand3();
     m_chooser.setDefaultOption("Auto 1", kAuto1);
     m_chooser.addOption("Auto 2", kAuto2);
+    m_chooser.addOption("Auto 3", kAuto3);
     SmartDashboard.putData("Auto choices", m_chooser);
   }
 
@@ -76,6 +79,9 @@ public class Robot extends TimedRobot {
         break;
       case kAuto2:
         m_autonomousCommand=auto2Command;
+        break;
+      case kAuto3:
+        m_autonomousCommand=auto3Command;
         break;
       default:
         m_autonomousCommand=auto1Command;

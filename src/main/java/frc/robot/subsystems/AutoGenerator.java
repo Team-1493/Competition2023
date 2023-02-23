@@ -41,7 +41,8 @@ public class AutoGenerator extends SubsystemBase{
     //Loading all autonomous paths and storing them in variables
     public PathPlannerTrajectory testPath1 = PathPlanner.loadPath("testPath1", new PathConstraints(4, 3));
     public PathPlannerTrajectory testPath2 = PathPlanner.loadPath("testPath2", new PathConstraints(4, 3));
-    
+    public PathPlannerTrajectory testPath3 = PathPlanner.loadPath("testPath3", new PathConstraints(4, 3)); 
+
     //Creates a path using the robot's initial position (from sds) and the desired position (given by vision)
     public PathPlannerTrajectory getPathUsingVision(Translation2d end_pose, Double end_heading, Double end_rotation){
         return PathPlanner.generatePath(
@@ -80,7 +81,7 @@ public class AutoGenerator extends SubsystemBase{
         //Putting default values into the Smartdashboard for everything relating to auto paths
         SmartDashboard.putBoolean("Intake_Is_On", false);
         SmartDashboard.putNumber("Path_position", 0.00);
-
+        SmartDashboard.putString("Path3_position", "none");
         
         //Putting all possible events in the global eventMap (these are placeholders/examples)
         eventMap.put("intake_off", new PrintCommand("Intake Off"));
@@ -96,6 +97,18 @@ public class AutoGenerator extends SubsystemBase{
         eventMap.put("marker_1", new InstantCommand(() -> SmartDashboard.putNumber("Path_position", 0.0)));
         eventMap.put("marker_2", new InstantCommand(() -> SmartDashboard.putNumber("Path_position", 0.5)));
         eventMap.put("marker_3", new InstantCommand(() -> SmartDashboard.putNumber("Path_position", 1.0)));
+        
+        //testPath3 test events
+        eventMap.put("place_cone", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "place_cone")));
+        eventMap.put("intake_cube", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "intake_cube")));
+        eventMap.put("intake_off", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "intake_off")));
+        eventMap.put("place_cube", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "Place_cube")));
+        eventMap.put("intake_cube", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "intake_cube")));
+        eventMap.put("intake_off", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "intake_off")));
+        eventMap.put("place_cube", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "place_cube")));
+        eventMap.put("balance_robot", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "balance_robot")));
+        eventMap.put("event_event", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "TEST1_EVENT")));
+        eventMap.put("event_event_2", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "TEST2_EVENT")));
         
         //The multi-line comment below is for testing if needed
      /* double timeEnd = testPath1.getEndState().timeSeconds;
@@ -162,6 +175,14 @@ public class AutoGenerator extends SubsystemBase{
         );
     }
 
+    //This is a list of commands to run during autonomous if testPath3 is being run
+    public SequentialCommandGroup autoCommand3(){
+        return new SequentialCommandGroup(
+            new InstantCommand( () -> sds.resetOdometry(testPath3.getInitialHolonomicPose())),
+            followEventBuilder(testPath3),
+            new InstantCommand( () -> sds.allStop())
+        );
+    }
 
     //Runs a path from the robot's current position to a new position (given by vision)
     //end_pose = x and y,   end_heading = angle of movement in degrees (look at pathplanner),   end_rotation = robot's rotation in degrees 
