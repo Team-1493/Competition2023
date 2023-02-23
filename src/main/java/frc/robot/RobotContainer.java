@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.AutoGenerator;
 import frc.robot.commands.DriveStick;
 import frc.robot.commands.FollowLimelight;
@@ -30,6 +31,7 @@ import frc.robot.subsystems.SwerveDrive;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here..
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final ArmSubsystem m_ArmSystem = new ArmSubsystem();
   public final SwerveDrive m_swervedriveSystem = new SwerveDrive();
   public final Limelight m_Limelight = new Limelight();
   public final IntakeSystem m_IntakeSystem = new IntakeSystem();
@@ -62,7 +64,8 @@ public class RobotContainer {
 
     new Trigger(btnResetGyro).onTrue(new ResetGyro(m_swervedriveSystem));
     new Trigger(btnUpdateConstants).onTrue(m_swervedriveSystem.UpdateConstantsCommand());    
-    new Trigger(btnUpdateConstants).onTrue(m_IntakeSystem.UpdateConstants());    
+    new Trigger(btnUpdateConstants).onTrue(m_IntakeSystem.UpdateConstants());
+    new Trigger(btnUpdateConstants).onTrue(m_ArmSystem.UpdateConstants());
     new Trigger(btnFollowLimelight).whileTrue(new FollowLimelight(m_swervedriveSystem, m_Limelight));
     new Trigger(btnAimAtTape).whileTrue(reflectivetape);
     new Trigger(btnIntakeCube).onTrue(m_IntakeSystem.IntakeCube());

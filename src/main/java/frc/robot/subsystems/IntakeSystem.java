@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -24,6 +25,7 @@ public class IntakeSystem extends SubsystemBase {
     private double rearIntakePower = 0.3;
     private double conveyorKf = 1024;
     private double shootSpeedMultiplier = 1;
+    private DigitalInput irSensor;
     public IntakeSystem() {
         SmartDashboard.putNumber("Top Conveyor Speed",topConveyorSpeed);
         SmartDashboard.putNumber("Bot Conveyor Speed",botConveyorSpeed);
@@ -39,6 +41,7 @@ public class IntakeSystem extends SubsystemBase {
         BotConveyor.config_kF(0,conveyorKf );
         TopConveyor.setInverted(InvertType.InvertMotorOutput);
         FrontIntakeBar.setInverted(InvertType.InvertMotorOutput);
+        irSensor = new DigitalInput(3);
     }
 
   /**
@@ -54,6 +57,12 @@ public class IntakeSystem extends SubsystemBase {
       frontIntakePower = SmartDashboard.getNumber("Front Intake Power",frontIntakePower);
       rearIntakePower = SmartDashboard.getNumber("Rear Intake Power",rearIntakePower);
       shootSpeedMultiplier = SmartDashboard.getNumber("Shoot Speed Multiplier", shootSpeedMultiplier);
+    });
+  }
+
+  public CommandBase RunFrontIntake() {
+    return runOnce(() -> {
+      FrontIntakeBar.set(ControlMode.PercentOutput, frontIntakePower);
     });
   }
 
@@ -81,6 +90,9 @@ public class IntakeSystem extends SubsystemBase {
   });
   }
 
+  public boolean HasCube(){
+    return !irSensor.get();
+  }
 
   
   /**

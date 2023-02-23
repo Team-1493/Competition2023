@@ -28,8 +28,8 @@ public class ArmSubsystem extends SubsystemBase {
     DigitalInput limitUpper = new DigitalInput(0);
     DigitalInput limitLower = new DigitalInput(1);
     double absPos, relPos;
-    double armkP = 0, armkD = 0, armkI = 0, armkIZone, armkF = 2;
-    double armkPdown = 0.15, armkDdown = 10, armkIdown = 2, armkIZonedown, armkFdown = 0;
+    double armkP = 0, armkD = 6, armkI = 0.0015, armkIZone = 100, armkF = 2.2;
+    double armkPdown = 0.15, armkDdown = 10, armkIdown = 100, armkIZonedown, armkFdown = 0;
     // double armkG = 0.05, armkS = 0.005, armkV = 0, armkA = 0;
     double armkG = 0.0721, armkS = -0.0138, armkV = 0, armkA = 0;
     double armkG2 = 0.0729, armkS2 = -0.0424, armkV2 = 0, armkA2 = 0;
@@ -150,6 +150,9 @@ public class ArmSubsystem extends SubsystemBase {
         armMotor.set(ControlMode.MotionMagic, armPos2, DemandType.ArbitraryFeedForward, arbff);
 
     }
+    public double getCounts(){
+        return armMotor.getSelectedSensorPosition();
+    }
 
     @Override
     public void periodic() {
@@ -211,6 +214,11 @@ public class ArmSubsystem extends SubsystemBase {
         armPos2 = SmartDashboard.getNumber("arm pos2", 0);
         armPos3 = SmartDashboard.getNumber("arm pos3", 0);
 
+    }
+
+    
+    public CommandBase UpdateConstants(){
+        return runOnce(() -> {updateConstants();});
     }
 
     public void isUpperLimitActive(double stick) {
