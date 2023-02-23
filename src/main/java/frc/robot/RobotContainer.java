@@ -4,10 +4,14 @@
 
 package frc.robot;
 
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.AutoGenerator;
 import frc.robot.commands.DriveStick;
 import frc.robot.commands.FollowLimelight;
+import frc.robot.commands.CubeIntake;
 import frc.robot.commands.ResetGyro;
+import frc.robot.commands.RickCommand;
+import frc.robot.commands.Stow;
 import frc.robot.commands.ReflectiveTape;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.IntakeSystem;
@@ -30,13 +34,17 @@ import frc.robot.subsystems.SwerveDrive;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here..
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  private final ArmSubsystem m_ArmSystem = new ArmSubsystem();
   public final SwerveDrive m_swervedriveSystem = new SwerveDrive();
   public final Limelight m_Limelight = new Limelight();
   public final IntakeSystem m_IntakeSystem = new IntakeSystem();
   public final AutoGenerator autoGenerator = new AutoGenerator(m_swervedriveSystem);
   public final Stick driverJoystick =new Stick();
   public final ReflectiveTape reflectivetape = new ReflectiveTape(m_swervedriveSystem);
+  public final Stow stowCommand = new Stow(m_ArmSystem,m_IntakeSystem);
+  public final CubeIntake cubeIntake = new CubeIntake(m_ArmSystem,m_IntakeSystem);
   Supplier<double[]> stickState = () -> driverJoystick.readDriverStick();
+
 
   public final DriveStick driveCommand = new DriveStick(m_swervedriveSystem,stickState); 
 
@@ -48,7 +56,8 @@ public class RobotContainer {
   public JoystickButton coneGrabberBackward = driverJoystick.getButton(5); //L1
   public JoystickButton btnIntakeCube = driverJoystick.getButton(7);
   public JoystickButton btnGrabCone = driverJoystick.getButton(8);
-
+  public JoystickButton btnStow = driverJoystick.getButton(9);
+  public JoystickButton btnRick = driverJoystick.getButton(10);
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -62,13 +71,16 @@ public class RobotContainer {
 
     new Trigger(btnResetGyro).onTrue(new ResetGyro(m_swervedriveSystem));
     new Trigger(btnUpdateConstants).onTrue(m_swervedriveSystem.UpdateConstantsCommand());    
-    new Trigger(btnUpdateConstants).onTrue(m_IntakeSystem.UpdateConstants());    
+    new Trigger(btnUpdateConstants).onTrue(m_IntakeSystem.UpdateConstants());
+    new Trigger(btnUpdateConstants).onTrue(m_ArmSystem.UpdateConstants());
     new Trigger(btnFollowLimelight).whileTrue(new FollowLimelight(m_swervedriveSystem, m_Limelight));
     new Trigger(btnAimAtTape).whileTrue(reflectivetape);
-    new Trigger(btnIntakeCube).onTrue(m_IntakeSystem.IntakeCube());
     new Trigger(btnGrabCone).onTrue(m_IntakeSystem.GrabCone());
-    new Trigger(btnIntakeCube).onFalse(m_IntakeSystem.StopMotors());
     new Trigger(btnGrabCone).onFalse(m_IntakeSystem.StopMotors());
+
+   new Trigger(btnIntakeCube).whileTrue(cubeIntake);
+    new Trigger(btnStow).onTrue(stowCommand);
+    new Trigger(btnRick).whileTrue(new RickCommand()  );
 
 
     new Trigger(driverJoystick.pov0).onTrue(m_swervedriveSystem.rotateInPlace(0.));
