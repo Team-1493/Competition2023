@@ -13,7 +13,6 @@ import frc.robot.commands.CubeIntake;
 import frc.robot.commands.ResetGyro;
 import frc.robot.commands.Stow;
 import frc.robot.commands.ReflectiveTape;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.IntakeSystem;
 import frc.robot.subsystems.Stick;
 import frc.robot.subsystems.Limelight;
@@ -34,7 +33,6 @@ import frc.robot.subsystems.SwerveDrive;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here..
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final ArmSubsystem m_ArmSystem = new ArmSubsystem();
   public final SwerveDrive m_swervedriveSystem = new SwerveDrive();
   public final Limelight m_Limelight = new Limelight();

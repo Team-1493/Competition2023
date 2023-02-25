@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.SwerveDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -38,8 +37,6 @@ public class FollowLimelight extends CommandBase {
   private double sideDistanceCutOff = 0.05;
   private double desiredForwardDistance = 2.5;
   private double forwardDistanceCutOff = 0.5;
-
-  private double counter = 0;
 
   private double[] target;
 

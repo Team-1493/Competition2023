@@ -215,7 +215,7 @@ public class ArmSubsystem extends SubsystemBase {
         posStowFinish=SmartDashboard.getNumber("arm Pos StowFinish", posStowFinish);
         posCubeIntake=SmartDashboard.getNumber("arm Pos Cube", posCubeIntake);
         posConeGrab=SmartDashboard.getNumber("arm Pos Cone Grab", posConeGrab);
-        posConePlace=SmartDashboard.getNumber("arm Pos Cone Place", posConePlace);s
+        posConePlace=SmartDashboard.getNumber("arm Pos Cone Place", posConePlace);
     }
 
     public CommandBase UpdateConstants() {
