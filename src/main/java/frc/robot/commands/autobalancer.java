@@ -5,10 +5,10 @@ import java.lang.Math;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
-public class AutoBalancer { 
+public class autobalancer { 
     public SwerveDrive sds;
     public Pigeon getheadingDegreesPigeon;
-    public AutoBalancer(SwerveDrive m_sds) {
+    public autobalancer(SwerveDrive m_sds) {
         sds = m_sds;
     }
 

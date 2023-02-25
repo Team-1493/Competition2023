@@ -111,7 +111,7 @@ public class RobotContainer {
 
 
   public Command getAutonomousCommand1() {
-    // An example command will be run in autonomou
+    // An example command will be run in autonomous
     autoGenerator.updatePID();;
     return autoGenerator.autoCommand1();
   }
@@ -119,6 +119,11 @@ public class RobotContainer {
   public Command getAutonomousCommand2() {
     // An example command will be run in autonomous
     return autoGenerator.autoCommand2();
+  }
+
+  public Command getAutonomousCommand3() {
+    //An example command will be run in autonomous
+    return autoGenerator.autoCommand3();
   }
 
 // We have different PID constants for the drive wheels between teleop and auto
