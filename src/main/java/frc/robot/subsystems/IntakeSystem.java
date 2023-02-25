@@ -19,10 +19,10 @@ public class IntakeSystem extends SubsystemBase {
     final TalonFX BotConveyor;
     final TalonFX FrontIntakeBar;
     final TalonFX RearIntakeBars;
-    private double topConveyorSpeed = 1;
-    private double botConveyorSpeed = 1.5;
-    private double frontIntakePower = 0.3;
-    private double rearIntakePower = 0.3;
+    private double topConveyorSpeed = .25;
+    private double botConveyorSpeed = .25;
+    private double frontIntakePower = 0.2;
+    private double rearIntakePower = 0.2;
     private double conveyorKf = 1024;
     private double shootSpeedMultiplier = 1;
     private DigitalInput irSensor;
@@ -37,11 +37,16 @@ public class IntakeSystem extends SubsystemBase {
         BotConveyor = new TalonFX(13);
         FrontIntakeBar = new TalonFX(10);
         RearIntakeBars = new TalonFX(11);
+
+        RearIntakeBars.configFactoryDefault();
+        FrontIntakeBar.configFactoryDefault();
+
         TopConveyor.config_kF(0,conveyorKf );
         BotConveyor.config_kF(0,conveyorKf );
         TopConveyor.setInverted(InvertType.InvertMotorOutput);
         FrontIntakeBar.setInverted(InvertType.InvertMotorOutput);
-        irSensor = new DigitalInput(3);
+        irSensor = new DigitalInput(2);
+        
     }
 
   /**
@@ -66,26 +71,23 @@ public class IntakeSystem extends SubsystemBase {
   }
 
   public void IntakeCube() {
-      TopConveyor.set(ControlMode.Velocity, topConveyorSpeed);
-      BotConveyor.set(ControlMode.Velocity, botConveyorSpeed);
+      TopConveyor.set(ControlMode.PercentOutput, topConveyorSpeed);
+//      BotConveyor.set(ControlMode.PercentOutput, botConveyorSpeed);
       FrontIntakeBar.set(ControlMode.PercentOutput, frontIntakePower);
       RearIntakeBars.set(ControlMode.PercentOutput, rearIntakePower);
   }
 
-  public CommandBase GrabCone() {
-    return runOnce(() -> {
+  public void GrabCone() {
       FrontIntakeBar.set(ControlMode.PercentOutput, frontIntakePower);
       RearIntakeBars.set(ControlMode.PercentOutput, -rearIntakePower);
-    });
   }
 
-  public CommandBase StopMotors(){
-    return runOnce(() -> {TopConveyor.set(ControlMode.Velocity, 0);
-    BotConveyor.set(ControlMode.Velocity, 0);
+  public void StopMotors(){
+    TopConveyor.set(ControlMode.PercentOutput, 0);
+    BotConveyor.set(ControlMode.PercentOutput, 0);
     FrontIntakeBar.set(ControlMode.PercentOutput, 0);
     RearIntakeBars.set(ControlMode.PercentOutput, 0);
-  });
-  }
+    }
 
   public boolean HasCube(){
     return !irSensor.get();

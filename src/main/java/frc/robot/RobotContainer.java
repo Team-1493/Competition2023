@@ -8,9 +8,9 @@ import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.AutoGenerator;
 import frc.robot.commands.DriveStick;
 import frc.robot.commands.FollowLimelight;
+import frc.robot.commands.ArmStickDrive;
 import frc.robot.commands.CubeIntake;
 import frc.robot.commands.ResetGyro;
-import frc.robot.commands.RickCommand;
 import frc.robot.commands.Stow;
 import frc.robot.commands.ReflectiveTape;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -21,6 +21,7 @@ import frc.robot.subsystems.Limelight;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.SwerveDrive;
@@ -39,14 +40,19 @@ public class RobotContainer {
   public final Limelight m_Limelight = new Limelight();
   public final IntakeSystem m_IntakeSystem = new IntakeSystem();
   public final AutoGenerator autoGenerator = new AutoGenerator(m_swervedriveSystem);
-  public final Stick driverJoystick =new Stick();
+  public final Stick driverJoystick =new Stick(0);
+  public final Stick operatorJoystick =new Stick(1);
+
   public final ReflectiveTape reflectivetape = new ReflectiveTape(m_swervedriveSystem);
   public final Stow stowCommand = new Stow(m_ArmSystem,m_IntakeSystem);
   public final CubeIntake cubeIntake = new CubeIntake(m_ArmSystem,m_IntakeSystem);
-  Supplier<double[]> stickState = () -> driverJoystick.readDriverStick();
+
+  Supplier<double[]> driverStickState = () -> driverJoystick.readStick();
+  Supplier<double[]> operatorStickState = () -> operatorJoystick.readStick();
 
 
-  public final DriveStick driveCommand = new DriveStick(m_swervedriveSystem,stickState); 
+  public final DriveStick driveCommand = new DriveStick(m_swervedriveSystem,driverStickState); 
+  public final ArmStickDrive armStickDrive = new ArmStickDrive(m_ArmSystem,operatorStickState);
 
   public JoystickButton btnAimAtTape = driverJoystick.getButton(1);
   public JoystickButton btnResetGyro = driverJoystick.getButton(2);
@@ -57,7 +63,11 @@ public class RobotContainer {
   public JoystickButton btnIntakeCube = driverJoystick.getButton(7);
   public JoystickButton btnGrabCone = driverJoystick.getButton(8);
   public JoystickButton btnStow = driverJoystick.getButton(9);
-  public JoystickButton btnRick = driverJoystick.getButton(10);
+
+  public JoystickButton btnArmManual = operatorJoystick.getButton(6);
+  public JoystickButton btnOperatorUpdateConstants = operatorJoystick.getButton(3);
+
+
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -70,25 +80,24 @@ public class RobotContainer {
   private void configureBindings() {
 
     new Trigger(btnResetGyro).onTrue(new ResetGyro(m_swervedriveSystem));
-    new Trigger(btnUpdateConstants).onTrue(m_swervedriveSystem.UpdateConstantsCommand());    
-    new Trigger(btnUpdateConstants).onTrue(m_IntakeSystem.UpdateConstants());
-    new Trigger(btnUpdateConstants).onTrue(m_ArmSystem.UpdateConstants());
+    new Trigger(btnUpdateConstants).onTrue( new InstantCommand(()-> updateConstants()));    
     new Trigger(btnFollowLimelight).whileTrue(new FollowLimelight(m_swervedriveSystem, m_Limelight));
     new Trigger(btnAimAtTape).whileTrue(reflectivetape);
-    new Trigger(btnGrabCone).onTrue(m_IntakeSystem.GrabCone());
-    new Trigger(btnGrabCone).onFalse(m_IntakeSystem.StopMotors());
+    new Trigger(btnGrabCone).onTrue( new InstantCommand( ()-> m_IntakeSystem.GrabCone()));
+    new Trigger(btnGrabCone).onFalse( new InstantCommand( ()->m_IntakeSystem.StopMotors()));
 
-   new Trigger(btnIntakeCube).whileTrue(cubeIntake);
+    new Trigger(btnIntakeCube).whileTrue(cubeIntake);
     new Trigger(btnStow).onTrue(stowCommand);
-    new Trigger(btnRick).whileTrue(new RickCommand()  );
-
 
     new Trigger(driverJoystick.pov0).onTrue(m_swervedriveSystem.rotateInPlace(0.));
     new Trigger(driverJoystick.pov0).onTrue(m_swervedriveSystem.rotateInPlace(0.));
     new Trigger(driverJoystick.pov90).onTrue(m_swervedriveSystem.rotateInPlace(90));
     new Trigger(driverJoystick.pov180).onTrue(m_swervedriveSystem.rotateInPlace(180));   
     new Trigger(driverJoystick.pov270).onTrue(m_swervedriveSystem.rotateInPlace(-90));
-    
+
+    //operator buttons
+    new Trigger(btnArmManual).whileTrue(armStickDrive);
+    new Trigger(btnOperatorUpdateConstants).onTrue( new InstantCommand(()-> updateConstants()));    
 /*  Tayab - you need to rethink these
  
     new Trigger(moveMotorForward).onTrue(grabbingCone.rotateMotorFoward.until(coneLimitSwitch::get));
@@ -118,6 +127,11 @@ public class RobotContainer {
     m_swervedriveSystem.setPIDSlot(slot);
   }
 
+  public void updateConstants(){
+    m_swervedriveSystem.updateConstants();
+    m_ArmSystem.updateConstants();
+    m_IntakeSystem.UpdateConstants(); 
+  }
 
 
 }

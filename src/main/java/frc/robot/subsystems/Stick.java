@@ -8,14 +8,18 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 // This is more of a utility subsystem than an actual subsystem
 
 public class Stick extends SubsystemBase {
-  public Joystick joy0=new Joystick(0);
-  public POVButton pov0=new POVButton(joy0, 0);
-  public POVButton pov90=new POVButton(joy0, 90);
-  public POVButton pov180=new POVButton(joy0, 180);
-  public POVButton pov270=new POVButton(joy0, 270);
+  public Joystick joy0;
+  public POVButton pov0;
+  public POVButton pov90;
+  public POVButton pov180;
+  public POVButton pov270;
   
-  public Stick() {
-
+  public Stick(int port) {
+    joy0=new Joystick(port);
+    pov0=new POVButton(joy0, 0);
+    pov90=new POVButton(joy0, 90);
+    pov180=new POVButton(joy0, 180);
+    pov270=new POVButton(joy0, 270);
   }
 
   // read the joystick and return an array containing:
@@ -23,7 +27,7 @@ public class Stick extends SubsystemBase {
   // [1]  squared magnitude in left/right direction (right is pos)
   // [2]  provides rotational speed
   // all values are -1 to 1
-  public double[] readDriverStick(){
+  public double[] readStick(){
     double[] stickValues = new double[3];
     double direction = joy0.getDirectionDegrees();
     double mag=joy0.getMagnitude();

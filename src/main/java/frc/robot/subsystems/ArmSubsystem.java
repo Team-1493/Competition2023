@@ -17,8 +17,6 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,33 +26,31 @@ public class ArmSubsystem extends SubsystemBase {
     CANCoder enc = new CANCoder(19);
     DigitalInput limitUpper = new DigitalInput(0);
     DigitalInput limitLower = new DigitalInput(1);
-    double absPos, relPos;
-    double armkP = 0, armkD = 6, armkI = 0.0015, armkIZone = 100, armkF = 2.2;
-    double armkPdown = 0.15, armkDdown = 10, armkIdown = 100, armkIZonedown, armkFdown = 0;
-    // double armkG = 0.05, armkS = 0.005, armkV = 0, armkA = 0;
+    // Gains for position control
+    double armkP = 1.7, armkD = 80, armkI = 0.0012, armkIZone=70, armkF = 0;
+    // feedforward accounts for gravity, friction and spring
+    // 3 sets of gains, depending on where arm is relative to neutral position -69 deg
+    // region 1, -69 to 0 deg   
+    // region 2, -69 to -90 deg
+    // region 3, >0 
     double armkG = 0.0721, armkS = -0.0138, armkV = 0, armkA = 0;
     double armkG2 = 0.0729, armkS2 = -0.0424, armkV2 = 0, armkA2 = 0;
     double armkG3 = 0.0721, armkS3 = -0.0138, armkV3 = 0, armkA3 = 0;
-    double armPos1 = 1170, armPos2 = 1210, armPos3 = 2081;
-    double armMMVel = 120, armMMAcc = 100;
-    double armMMVeldown = 30, armMMAccdown = 40;
-    double armForwardSensorLim = 2600, armReverseSensorLim = 1200;
-    double armMaxOutput = .4;
-
-    double angle, angleCounts;
+    double armForwardSensorLim = 2600, armReverseSensorLim = 1140;
+    double armMaxOutput = .15;
+    public double posStow=1110,posStowFinish=1090;
+    public double posCubeIntake=1275,posConeGrab=2200,posConePlace=2300;
+    public double angle, angleCounts;
     double angleFromHorizontalDeg, angleFromHorizontalCounts, angleFromHorizontalRad;
     double cosAngleFromHorizontal;
     double angleOffsetDeg = 186.3;
     double angleOffsetCounts = angleOffsetDeg * 4096 / 360.;
     double angleRate, angleRatePrev = 0, angleRate2;
-    double voltage;
     double time = 0, timePrev = 0;
     int button = 0;
-    double stick;
-    boolean logging = false, loggingPrev = false;
+    double stick=0;
     boolean ls_upper = true, ls_lower = false, ls_upperActive = false;
-
-    double arbff, counts;
+    double arbff;
     boolean active = false;
 
     public ArmSubsystem() {
@@ -88,10 +84,11 @@ public class ArmSubsystem extends SubsystemBase {
         armMotor.configPeakOutputForward(armMaxOutput);
         armMotor.configPeakOutputReverse(-armMaxOutput);
 
-        // set current limit
-        StatorCurrentLimitConfiguration currentConfig = new StatorCurrentLimitConfiguration(true, 20,
-                25, 1);
-        // armMotor.configGetStatorCurrentLimit(currentConfig) ;
+    // set current limit
+    StatorCurrentLimitConfiguration currentConfig = 
+        new StatorCurrentLimitConfiguration(true, 30, 
+        32, .1);
+    armMotor.configStatorCurrentLimit(currentConfig);
 
         armMotor.setStatusFramePeriod(StatusFrame.Status_10_Targets, 5);
         armMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_13_Base_PIDF0, 5);
@@ -102,11 +99,11 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("arm kF", armkF);
         SmartDashboard.putNumber("arm kIzone", armkIZone);
 
-        SmartDashboard.putNumber("arm kP down", armkPdown);
-        SmartDashboard.putNumber("arm kI down ", armkIdown);
-        SmartDashboard.putNumber("arm kD down", armkDdown);
-        SmartDashboard.putNumber("arm kF down", armkFdown);
-        SmartDashboard.putNumber("arm kIzone down", armkIZonedown);
+        SmartDashboard.putNumber("arm Pos Stow", posStow);
+        SmartDashboard.putNumber("arm Pos StowFinish", posStowFinish);
+        SmartDashboard.putNumber("arm Pos Cube", posCubeIntake);
+        SmartDashboard.putNumber("arm Pos Cone Grab", posConeGrab);
+        SmartDashboard.putNumber("arm Pos Cone Place", posConePlace);
 
         SmartDashboard.putNumber("arm kG", armkG);
         SmartDashboard.putNumber("arm kS", armkS);
@@ -123,93 +120,64 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("arm kV3", armkV3);
         SmartDashboard.putNumber("arm kA3", armkA3);
 
-        SmartDashboard.putNumber("arm stow pos", armPos1);
-        SmartDashboard.putNumber("arm intake pos", armPos2);
-        SmartDashboard.putNumber("arm cone pick pos", armPos3);
-        SmartDashboard.putNumber("arm MMvel", armMMVel);
-        SmartDashboard.putNumber("arm MMacc", armMMAcc);
-        SmartDashboard.putNumber("arm MMveldown", armMMVeldown);
-        SmartDashboard.putNumber("arm MMaccdown", armMMAccdown);
         SmartDashboard.putNumber("arm ForSensorLim", armForwardSensorLim);
         SmartDashboard.putNumber("arm RevSensorLim", armReverseSensorLim);
         SmartDashboard.putNumber("arm MaxOutput", armMaxOutput);
-
-        SmartDashboard.putBoolean("logging", false);
-
         updateConstants();
 
     }
 
-    public void StopMotors() {
-        active = false;
-        armMotor.set(ControlMode.PercentOutput, 0);
-    }
-
-    public void setTgtPositionInCounts(double _counts) {
-        armMotor.setIntegralAccumulator(0, 0, 20);
-
-        if (angleFromHorizontalDeg < -69)
-            arbff = +armkG2 * Math.cos(angleFromHorizontalRad) + armkS2;
-        else if (angleFromHorizontalDeg >= -69 && angleFromHorizontalDeg < 0)
-            arbff = +armkG * Math.cos(angleFromHorizontalRad) + armkS;
-        else
-            arbff = +armkG3 * Math.cos(angleFromHorizontalRad) + armkS3;
-
-        active = true;
-        counts = _counts;
-
-    }
-
-    public double getCounts() {
-        return armMotor.getSelectedSensorPosition();
-    }
-
     @Override
     public void periodic() {
+        armMotor.getSelectedSensorPosition();
+        angle = enc.getPosition();
+        angleCounts = armMotor.getSelectedSensorPosition(); 
+        angleFromHorizontalDeg = angle - angleOffsetDeg;
+
         ls_upper = limitUpper.get();
         ls_lower = limitLower.get();
-
         isUpperLimitActive(stick);
 
-        time = Timer.getFPGATimestamp();
-
-        voltage = armMotor.getMotorOutputVoltage();
-        angle = enc.getPosition();
-        angleCounts = armMotor.getSelectedSensorPosition();
-        angleRate = armMotor.getSelectedSensorVelocity();
-
-        angleFromHorizontalDeg = angle - angleOffsetDeg;
-        angleFromHorizontalCounts = angleCounts - angleOffsetCounts;
-        angleFromHorizontalRad = angleFromHorizontalDeg * Math.PI / 180.;
-        cosAngleFromHorizontal = Math.cos(angleFromHorizontalDeg * Math.PI / 180.);
-
-        angleRate2 = (angleRate - angleRatePrev) / (time - timePrev);
-
-        // System.out.println(time+" "+(time-timePrev)+" "+angleRate+" "+angleRatePrev);
-
-        angleRatePrev = angleRate;
-        timePrev = time;
-
+        SmartDashboard.putNumber("arm voltage", armMotor.getMotorOutputVoltage());
+        SmartDashboard.putNumber("arm current", armMotor.getStatorCurrent());
         SmartDashboard.putNumber("arm Pos Counts", angleCounts);
-        SmartDashboard.putNumber("arm Pos Deg", angle);
-        SmartDashboard.putNumber("arm Cos(Pos)", cosAngleFromHorizontal);
-
-        SmartDashboard.putNumber("arm angle from Horiz Deg", angleFromHorizontalDeg);
-        SmartDashboard.putNumber("arm angle from Horiz Counts", angleFromHorizontalCounts);
-        SmartDashboard.putNumber("arm angle rate", angleRate);
-        SmartDashboard.putNumber("arm angle rate2", angleRate2);
-
-        SmartDashboard.putNumber("arm voltage", voltage);
-        SmartDashboard.putNumber("arm current", armMotor.getStatorCurrent());
-        SmartDashboard.putNumber("arm current", armMotor.getStatorCurrent());
+        SmartDashboard.putNumber("arm Pos DegFromHor", angleFromHorizontalDeg);
         SmartDashboard.putNumber("arm CLE", armMotor.getClosedLoopError());
         SmartDashboard.putBoolean("arm Upper LS", ls_upper);
         SmartDashboard.putBoolean("arm Lower LS", ls_lower);
-
-        if (active) {
-            armMotor.set(ControlMode.MotionMagic, counts, DemandType.ArbitraryFeedForward, arbff);
-        }
     }
+
+
+    public void StopMotors() {
+        armMotor.set(ControlMode.PercentOutput, 0);
+    }
+
+    public void resetIntegralAccumulator(){
+        armMotor.setIntegralAccumulator(0, 0, 20);
+    }
+
+
+    public void setPositionInCounts(double counts) {    
+        stick=0;          
+        calculateFeedfwd();
+        if (active) 
+            armMotor.set(ControlMode.Position, counts, DemandType.ArbitraryFeedForward, arbff);
+        else armMotor.set(ControlMode.PercentOutput, 0);
+    }
+
+    public void setPositionStick(double setPoint) {
+        stick=setPoint;              
+        calculateFeedfwd();
+        if (active) 
+            armMotor.set(ControlMode.Position, setPoint, DemandType.ArbitraryFeedForward, arbff);
+        else armMotor.set(ControlMode.PercentOutput, 0);
+    }
+
+
+    public double getCounts() {
+        return angleCounts;
+    }
+
 
     public void updateConstants() {
         armkG = SmartDashboard.getNumber("arm kG", 0);
@@ -227,30 +195,11 @@ public class ArmSubsystem extends SubsystemBase {
         armkF = SmartDashboard.getNumber("arm kF", 0);
         armkIZone = SmartDashboard.getNumber("arm kIzone", 0);
 
-        armkPdown = SmartDashboard.getNumber("arm kP down", 0);
-        armkIdown = SmartDashboard.getNumber("arm kI down", 0);
-        armkDdown = SmartDashboard.getNumber("arm kD down", 0);
-        armkFdown = SmartDashboard.getNumber("arm kF down", 0);
-        armkIZonedown = SmartDashboard.getNumber("arm kIzone down", 0);
-
         armMotor.config_kP(0, armkP);
         armMotor.config_kI(0, armkI);
         armMotor.config_kD(0, armkD);
         armMotor.config_kF(0, armkF);
         armMotor.config_IntegralZone(0, armkIZone);
-
-        armMotor.config_kP(1, armkPdown);
-        armMotor.config_kI(1, armkIdown);
-        armMotor.config_kD(1, armkDdown);
-        armMotor.config_kF(1, armkFdown);
-        armMotor.config_IntegralZone(1, armkIZonedown);
-
-        armMMVel = SmartDashboard.getNumber("arm MMvel", 0);
-        armMMAcc = SmartDashboard.getNumber("arm MMacc", 0);
-        armMMVeldown = SmartDashboard.getNumber("arm MMveldown", 0);
-        armMMAccdown = SmartDashboard.getNumber("arm MMaccdown", 0);
-        armMotor.configMotionCruiseVelocity(armMMVel);
-        armMotor.configMotionAcceleration(armMMAcc);
 
         armForwardSensorLim = SmartDashboard.getNumber("arm ForSensorLim", 0);
         armReverseSensorLim = SmartDashboard.getNumber("arm RevSensorLim", 0);
@@ -262,10 +211,11 @@ public class ArmSubsystem extends SubsystemBase {
         armMotor.configPeakOutputForward(armMaxOutput);
         armMotor.configPeakOutputReverse(-armMaxOutput);
 
-        armPos1 = SmartDashboard.getNumber("arm pos1", 0);
-        armPos2 = SmartDashboard.getNumber("arm pos2", 0);
-        armPos3 = SmartDashboard.getNumber("arm pos3", 0);
-
+        posStow=SmartDashboard.getNumber("arm Pos Stow", posStow);
+        posStowFinish=SmartDashboard.getNumber("arm Pos StowFinish", posStowFinish);
+        posCubeIntake=SmartDashboard.getNumber("arm Pos Cube", posCubeIntake);
+        posConeGrab=SmartDashboard.getNumber("arm Pos Cone Grab", posConeGrab);
+        posConePlace=SmartDashboard.getNumber("arm Pos Cone Place", posConePlace);s
     }
 
     public CommandBase UpdateConstants() {
@@ -281,9 +231,19 @@ public class ArmSubsystem extends SubsystemBase {
             ls_upperActive = true;
         else
             ls_upperActive = false;
+
+        active=!ls_upperActive;
     }
 
-    public static double map(double i, double b1, double t1, double b2, double t2) {
-        return (i - b1) / (t1 - b1) * (t2 - b2) + b2;
+    public void calculateFeedfwd(){
+        angleFromHorizontalRad = angleFromHorizontalDeg * Math.PI / 180.;
+        if (angleFromHorizontalDeg < -69)
+            arbff = +armkG2 * Math.cos(angleFromHorizontalRad) + armkS2;
+        else if (angleFromHorizontalDeg >= -69 && angleFromHorizontalDeg < 0)
+            arbff = +armkG * Math.cos(angleFromHorizontalRad) + armkS;
+        else
+            arbff = +armkG3 * Math.cos(angleFromHorizontalRad) + armkS3;
     }
+
+
 }
