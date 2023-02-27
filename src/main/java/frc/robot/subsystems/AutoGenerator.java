@@ -25,15 +25,20 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.commands.CubeIntake;
+import frc.robot.commands.Stow;
 import frc.robot.subsystems.SwerveDrive;
 import frc.robot.subsystems.SwerveModule;
 
 
-
 public class AutoGenerator extends SubsystemBase{
-    //Defining the SwerveDrive used by the AutoGenerator
+    //Defining the SwerveDrive subsystem used by the AutoGenerator in a placeholder variable
     private SwerveDrive sds;   
     
+    //Defining the CubeIntake and Stow commands used by the AutoGenerator in placeholder variables
+    private CubeIntake intake_cube;
+    private Stow stow_arm;
+
     //Defining a HashMap called eventMap, which will store all events that can run during auto
     private HashMap<String, Command> eventMap = new HashMap<>();
     
@@ -59,9 +64,13 @@ public class AutoGenerator extends SubsystemBase{
 
 
     //This method will be called once during the beginning of autonomous
-    public AutoGenerator(SwerveDrive m_sds) {
+    public AutoGenerator(SwerveDrive m_sds, ArmSubsystem arm, IntakeSystem intake) {
         //defining the SwerveDrive used by this class as the given SwerveDrive instance
         sds = m_sds;
+
+        //defining the CubeIntake and Stow commands used by this class by using the given ArmSubsystem and IntakeSystem
+        intake_cube = new CubeIntake(arm, intake);
+        stow_arm = new Stow(arm, intake);
 
         //When 360 degrees is exceeded, the rotation will loop back to 1 (no going over 360 degrees or 2*PI radians)
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -83,32 +92,12 @@ public class AutoGenerator extends SubsystemBase{
         SmartDashboard.putNumber("Path_position", 0.00);
         SmartDashboard.putString("Path3_position", "none");
         
-        //Putting all possible events in the global eventMap (these are placeholders/examples)
-        eventMap.put("intake_off", new PrintCommand("Intake Off"));
-        
-            //some events change relevant values in the SmartDashboard
-        eventMap.put("intake_on", new InstantCommand(() -> SmartDashboard.putBoolean("Intake_Is_On", true)));
-        
-        eventMap.put("place_cube_2", new PrintCommand("Cube has been placed!"));
-        eventMap.put("balance_robot", new PrintCommand("Balanced Robot"));
-        eventMap.put("path_started", new PrintCommand("Path has started"));
-        eventMap.put("path_ended", new PrintCommand("Path has ended"));
+        //These events are used in all or multiple autonomous paths
+        eventMap.put("intake_cube", intake_cube);
+        eventMap.put("stow", stow_arm);
 
-        eventMap.put("marker_1", new InstantCommand(() -> SmartDashboard.putNumber("Path_position", 0.0)));
-        eventMap.put("marker_2", new InstantCommand(() -> SmartDashboard.putNumber("Path_position", 0.5)));
-        eventMap.put("marker_3", new InstantCommand(() -> SmartDashboard.putNumber("Path_position", 1.0)));
         
-        //testPath3 test events
-        eventMap.put("place_cone", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "place_cone")));
-        eventMap.put("intake_cube", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "intake_cube")));
-        eventMap.put("intake_off", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "intake_off")));
-        eventMap.put("place_cube", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "Place_cube")));
-        eventMap.put("intake_cube", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "intake_cube")));
-        eventMap.put("intake_off", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "intake_off")));
-        eventMap.put("place_cube", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "place_cube")));
-        eventMap.put("balance_robot", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "balance_robot")));
-        eventMap.put("event_event", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "TEST1_EVENT")));
-        eventMap.put("event_event_2", new InstantCommand(() -> SmartDashboard.putString("Path3_position", "TEST2_EVENT")));
+        
         
         //The multi-line comment below is for testing if needed
      /* double timeEnd = testPath1.getEndState().timeSeconds;
