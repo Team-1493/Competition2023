@@ -40,7 +40,7 @@ public class RobotContainer {
   public final SwerveDrive m_swervedriveSystem = new SwerveDrive();
   public final Limelight m_Limelight = new Limelight();
   public final IntakeSystem m_IntakeSystem = new IntakeSystem();
-  public final AutoGenerator autoGenerator = new AutoGenerator(m_swervedriveSystem);
+  public final AutoGenerator autoGenerator = new AutoGenerator(m_swervedriveSystem, m_ArmSystem, m_IntakeSystem);
   public final Stick driverJoystick =new Stick(0);
   public final Stick operatorJoystick =new Stick(1);
 
