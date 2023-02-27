@@ -23,7 +23,7 @@ public class IntakeSystem extends SubsystemBase {
     private double frontIntakePower = 0.2;
     private double rearIntakePower = 0.2;
     private double conveyorKf = 1024;
-    private double shootSpeedMultiplier = 1;
+    private double shootSpeedMultiplier = 3;
     private DigitalInput irSensor;
     public IntakeSystem() {
         SmartDashboard.putNumber("Top Conveyor Speed",topConveyorSpeed);
@@ -79,6 +79,16 @@ public class IntakeSystem extends SubsystemBase {
   public void GrabCone() {
       FrontIntakeBar.set(ControlMode.PercentOutput, frontIntakePower);
       RearIntakeBars.set(ControlMode.PercentOutput, -rearIntakePower);
+  }
+  public void DropCone() {
+      FrontIntakeBar.set(ControlMode.PercentOutput, -frontIntakePower);
+      RearIntakeBars.set(ControlMode.PercentOutput, rearIntakePower);
+  }
+
+  public void ShootCube(){
+    TopConveyor.set(ControlMode.PercentOutput, topConveyorSpeed*shootSpeedMultiplier);
+    BotConveyor.set(ControlMode.PercentOutput, botConveyorSpeed*shootSpeedMultiplier);
+
   }
 
   public void StopMotors(){

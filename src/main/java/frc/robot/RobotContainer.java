@@ -7,10 +7,13 @@ package frc.robot;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.AutoGenerator;
 import frc.robot.commands.DriveStick;
+import frc.robot.commands.DropCone;
 import frc.robot.commands.FollowLimelight;
+import frc.robot.commands.GrabCone;
 import frc.robot.commands.ArmStickDrive;
 import frc.robot.commands.CubeIntake;
 import frc.robot.commands.ResetGyro;
+import frc.robot.commands.ShootCube;
 import frc.robot.commands.Stow;
 import frc.robot.commands.ReflectiveTape;
 import frc.robot.subsystems.IntakeSystem;
@@ -41,6 +44,7 @@ public class RobotContainer {
   public final Stick driverJoystick =new Stick(0);
   public final Stick operatorJoystick =new Stick(1);
 
+
   public final ReflectiveTape reflectivetape = new ReflectiveTape(m_swervedriveSystem);
   public final Stow stowCommand = new Stow(m_ArmSystem,m_IntakeSystem);
   public final CubeIntake cubeIntake = new CubeIntake(m_ArmSystem,m_IntakeSystem);
@@ -56,11 +60,12 @@ public class RobotContainer {
   public JoystickButton btnResetGyro = driverJoystick.getButton(2);
   public JoystickButton btnUpdateConstants = driverJoystick.getButton(3);
   public JoystickButton btnFollowLimelight = driverJoystick.getButton(4);
-  public JoystickButton coneGrabberForward = driverJoystick.getButton(6); // R1
-  public JoystickButton coneGrabberBackward = driverJoystick.getButton(5); //L1
+  public JoystickButton btnDropCone = driverJoystick.getButton(5); //L1
+  public JoystickButton btnGrabCone = driverJoystick.getButton(6); // R1
   public JoystickButton btnIntakeCube = driverJoystick.getButton(7);
-  public JoystickButton btnGrabCone = driverJoystick.getButton(8);
+  public JoystickButton btnShootCube = driverJoystick.getButton(8);
   public JoystickButton btnStow = driverJoystick.getButton(9);
+
 
   public JoystickButton btnArmManual = operatorJoystick.getButton(6);
   public JoystickButton btnOperatorUpdateConstants = operatorJoystick.getButton(3);
@@ -81,9 +86,10 @@ public class RobotContainer {
     new Trigger(btnUpdateConstants).onTrue( new InstantCommand(()-> updateConstants()));    
     new Trigger(btnFollowLimelight).whileTrue(new FollowLimelight(m_swervedriveSystem, m_Limelight));
     new Trigger(btnAimAtTape).whileTrue(reflectivetape);
-    new Trigger(btnGrabCone).onTrue( new InstantCommand( ()-> m_IntakeSystem.GrabCone()));
-    new Trigger(btnGrabCone).onFalse( new InstantCommand( ()->m_IntakeSystem.StopMotors()));
-
+    new Trigger(btnGrabCone).whileTrue(new GrabCone(m_IntakeSystem));
+    new Trigger(btnDropCone).whileTrue(new DropCone(m_IntakeSystem));
+    
+    new Trigger(btnShootCube).whileTrue(new ShootCube(m_IntakeSystem));
     new Trigger(btnIntakeCube).whileTrue(cubeIntake);
     new Trigger(btnStow).onTrue(stowCommand);
 

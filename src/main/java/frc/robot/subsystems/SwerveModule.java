@@ -135,7 +135,7 @@ public SwerveModule(String name, int driveID, int turnID, int cancoderID, double
     
 
     m_turn.configFactoryDefault();
-    m_turn.setNeutralMode(NeutralMode.Brake);
+    m_turn.setNeutralMode(NeutralMode.Coast);
 
 
     m_turn.configRemoteFeedbackFilter(e_turn, 0, 25);
@@ -198,9 +198,8 @@ public SwerveModule(String name, int driveID, int turnID, int cancoderID, double
         double acc = (speed-speedPrev)/0.020;
         speedPrev=speed;
 
-        m_drive.set(ControlMode.Velocity,  speed*MPSToNativeSpeed,
+       m_drive.set(ControlMode.Velocity,  speed*MPSToNativeSpeed,
             DemandType.ArbitraryFeedForward, feedforward_drive.calculate(speed,acc));
-            System.out.println(turnAngle*RadiansToNativePos);
         m_turn.set(ControlMode.Position,turnAngle*RadiansToNativePos);
     }
 
