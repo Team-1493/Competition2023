@@ -34,7 +34,7 @@ public class SwerveModule{
 
 
     // Robot Dimensions for MK4 Swerve
-    private  double  wheelDiamInches = 4.084;
+    private  double  wheelDiamInches = 4.000; //4.084;
     private double wheelCircumferenceMaters=wheelDiamInches*Math.PI*0.0254; // 0.32588 
     private double gearRatioDrive=8.1428; 
     // 1499  (3mps = 4695 rpm)
@@ -108,7 +108,7 @@ public SwerveModule(String name, int driveID, int turnID, int cancoderID, double
 
 // set up the turn encoder
     e_turn=new CANCoder(cancoderID);
-    e_turn.configSensorDirection(false);                    
+    e_turn.configSensorDirection(true);                    
     e_turn.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
     e_turn.setPosition(e_turn.getAbsolutePosition()-zeropos);
 
@@ -198,9 +198,10 @@ public SwerveModule(String name, int driveID, int turnID, int cancoderID, double
         double acc = (speed-speedPrev)/0.020;
         speedPrev=speed;
 
-//        m_drive.set(ControlMode.Velocity,  speed*MPSToNativeSpeed,
-//            DemandType.ArbitraryFeedForward, feedforward_drive.calculate(speed,acc));
-//    m_turn.set(ControlMode.Position,turnAngle*RadiansToNativePos);
+        m_drive.set(ControlMode.Velocity,  speed*MPSToNativeSpeed,
+            DemandType.ArbitraryFeedForward, feedforward_drive.calculate(speed,acc));
+            System.out.println(turnAngle*RadiansToNativePos);
+        m_turn.set(ControlMode.Position,turnAngle*RadiansToNativePos);
     }
 
 

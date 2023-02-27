@@ -169,8 +169,10 @@ public class ArmSubsystem extends SubsystemBase {
         stick=setPoint;              
         calculateFeedfwd();
         if (active) 
-            armMotor.set(ControlMode.Position, setPoint, DemandType.ArbitraryFeedForward, arbff);
-        else armMotor.set(ControlMode.PercentOutput, 0);
+//            armMotor.set(ControlMode.Position, setPoint, DemandType.ArbitraryFeedForward, arbff);
+            armMotor.set(ControlMode.PercentOutput, 0);
+  
+else armMotor.set(ControlMode.PercentOutput, 0);
     }
 
 

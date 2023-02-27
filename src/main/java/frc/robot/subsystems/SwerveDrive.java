@@ -30,10 +30,10 @@ public class SwerveDrive extends SubsystemBase {
 
       
 public static SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-  new Translation2d(0.257, -0.257), 
-  new Translation2d(0.257, +0.257), 
-  new Translation2d(-0.257, -0.257), 
-  new Translation2d(-0.257, +0.257));
+  new Translation2d(0.2131, -0.2105), 
+  new Translation2d(0.2131, +0.2105), 
+  new Translation2d(-0.2131, -0.2105), 
+  new Translation2d(-0.2131, +0.2105));
 
   public final Pigeon gyro = new Pigeon(20);
   public SwerveModuleState[] moduleStatesOptimized = new SwerveModuleState[4];
@@ -53,7 +53,7 @@ public static SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
     
 
     // Turn Module Offsets in degrees   FR-FL-BR-BL
-    double[] turnMotorZeroPos={4.13, 105.9, 29.9, 56.9};
+    double[] turnMotorZeroPos={-58.62,92.72,-114.08,78.22};
 
     modules[0]=new SwerveModule("FR",2,1,11,
         turnMotorZeroPos[0]);
@@ -267,6 +267,9 @@ while(i<4){
 // add whatever values you want to see
   SmartDashboard.putNumber(moduleNames[i]+" Dpos",modules[i].getDrivePosition());            
   SmartDashboard.putNumber(moduleNames[i]+" Dvel",modules[i].getDriveVelocity()); 
+  SmartDashboard.putNumber(moduleNames[i]+" TPos",modules[i].getTurnPosition_Deg());
+  SmartDashboard.putNumber(moduleNames[i]+" TabsPos",modules[i].getTurnAbsPosition());
+
   i++;
 }
 SmartDashboard.putNumber("Heading",heading);
