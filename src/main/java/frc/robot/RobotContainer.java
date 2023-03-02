@@ -14,7 +14,8 @@ import frc.robot.commands.ArmDefaultCommand;
 import frc.robot.commands.ArmOverCone;
 import frc.robot.commands.CubeIntake;
 import frc.robot.commands.ResetGyro;
-import frc.robot.commands.ShootCube;
+import frc.robot.commands.ShootCubeAuto;
+import frc.robot.commands.ShootCubeManual;
 import frc.robot.commands.Stow;
 import frc.robot.commands.ReflectiveTape;
 import frc.robot.subsystems.IntakeSystem;
@@ -69,6 +70,7 @@ public class RobotContainer {
   public JoystickButton btnShootCube1 = operatorJoystick.getButton(1);
   public JoystickButton btnShootCube2 = operatorJoystick.getButton(2);
   public JoystickButton btnShootCube3 = operatorJoystick.getButton(3);
+  public JoystickButton btnShootCubeAuto = operatorJoystick.getButton(4);
   public JoystickButton btnIntakeCube = operatorJoystick.getButton(6);
   public JoystickButton btnArmToGetcone = operatorJoystick.getButton(7);
 
@@ -90,16 +92,16 @@ public class RobotContainer {
 
     new Trigger(btnResetGyro).onTrue(new ResetGyro(m_swervedriveSystem));
     new Trigger(btnUpdateConstants).onTrue( new InstantCommand(()-> updateConstants()));    
-    new Trigger(btnFollowLimelight).whileTrue(new FollowLimelight(m_swervedriveSystem, m_Limelight));
+    new Trigger(btnFollowLimelight).whileTrue(new FollowLimelight(m_swervedriveSystem, m_Limelight,true,true));
     new Trigger(btnAimAtTape).whileTrue(reflectivetape);
 
     new Trigger(btnGrabCone).whileTrue(new GrabCone(m_IntakeSystem,m_ArmSystem));
     new Trigger(btnDropCone).whileTrue(new DropCone(m_IntakeSystem,m_ArmSystem));
     
-    new Trigger(btnShootCube1).whileTrue(new ShootCube(m_IntakeSystem,1));
-    new Trigger(btnShootCube2).whileTrue(new ShootCube(m_IntakeSystem,2));
-    new Trigger(btnShootCube3).whileTrue(new ShootCube(m_IntakeSystem,3));
-
+    new Trigger(btnShootCube1).whileTrue(new ShootCubeManual(m_IntakeSystem,1));
+    new Trigger(btnShootCube2).whileTrue(new ShootCubeManual(m_IntakeSystem,2));
+    new Trigger(btnShootCube3).whileTrue(new ShootCubeManual(m_IntakeSystem,3));
+    new Trigger(btnShootCubeAuto).whileTrue(new ShootCubeAuto().getShootCubeAutoCommand(m_IntakeSystem, m_swervedriveSystem, m_Limelight));
 
     new Trigger(btnIntakeCube).whileTrue(cubeIntake);
     new Trigger(btnIntakeCube).onFalse(stowCommand);

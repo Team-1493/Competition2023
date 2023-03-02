@@ -23,6 +23,7 @@ public class IntakeSystem extends SubsystemBase {
     private double topConveyorSpeed = 500;
     private double botConveyorSpeed = 500;
     private double topConveyorShootSpeed=700;
+    private double LimelightShootSpeed = 1200;
     private double botConveyorShootSpeed1=700;
     private double botConveyorShootSpeed2=1200;
     private double botConveyorShootSpeed3=1600;
@@ -46,6 +47,7 @@ public class IntakeSystem extends SubsystemBase {
         SmartDashboard.putNumber("Front Intake Power",frontIntakePower);
         SmartDashboard.putNumber("Rear Intake Power",rearIntakePower);
         SmartDashboard.putNumber("Top Conveyor Shoot Speed", topConveyorShootSpeed);
+        SmartDashboard.putNumber("Limelight Shoot Speed", LimelightShootSpeed);
         SmartDashboard.putNumber("Bot Conveyor Shoot Speed1", botConveyorShootSpeed1);
         SmartDashboard.putNumber("Bot Conveyor Shoot Speed2", botConveyorShootSpeed2);
         SmartDashboard.putNumber("Bot Conveyor Shoot Speed3", botConveyorShootSpeed3);
@@ -160,10 +162,14 @@ public class IntakeSystem extends SubsystemBase {
 
   }
 
-  public void botConveyorShootCube(int level){
-    if(level==1)speed=botConveyorShootSpeed1;
-    else if(level==2)speed=botConveyorShootSpeed2;
+  public void botConveyorShootCube(int speedLevel){
+    if (speedLevel==0){
+      speed = SmartDashboard.getNumber("Limelight Shoot Speed", LimelightShootSpeed);
+    }
+    else if(speedLevel==1)speed=botConveyorShootSpeed1;
+    else if(speedLevel==2)speed=botConveyorShootSpeed2;
     else speed=botConveyorShootSpeed3;
+    
     BotConveyor.set(ControlMode.Velocity, speed);
   }
 
