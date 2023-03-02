@@ -4,36 +4,40 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.IntakeSystem;
 
-public class DropCone extends CommandBase {
+public class ArmOverCone extends CommandBase {
   @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
-
+ 
+    private ArmSubsystem m_ArmSubsystem;
     private IntakeSystem m_IntakeSystem;
-    private ArmSubsystem m_arm;
 
-  public DropCone(IntakeSystem intake, ArmSubsystem arm) {
+  public ArmOverCone(ArmSubsystem arm,IntakeSystem intake) {
+    m_ArmSubsystem = arm;
     m_IntakeSystem = intake;
-    m_arm=arm;
-    addRequirements(intake,arm);
+
+    addRequirements(arm,intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_arm.motorActive=true;
-    m_IntakeSystem.DropCone();
-
+    m_ArmSubsystem.resetIntegralAccumulator();  
 
   }
 
   // Called every time the scheduler runs while the command is schedule d.
   @Override
   public void execute() {
-    m_arm.setPositionInCounts(m_arm.posConePlace);
+    m_ArmSubsystem.motorActive=true;
+    if(m_ArmSubsystem.getCounts()<1400)m_IntakeSystem.runFrontIntakeBar();
+    else m_IntakeSystem.StopMotors();
+    m_ArmSubsystem.setPositionInCounts(m_ArmSubsystem.posOverCone);
+    
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+//    m_ArmSubsystem.StopMotors();
     m_IntakeSystem.StopMotors();
   }
 

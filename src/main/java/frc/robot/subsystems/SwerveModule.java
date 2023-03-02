@@ -35,12 +35,20 @@ public class SwerveModule{
 
     // Robot Dimensions for MK4 Swerve
     private  double  wheelDiamInches = 4.000; //4.084;
-    private double wheelCircumferenceMaters=wheelDiamInches*Math.PI*0.0254; // 0.32588 
+    private double wheelCircumferenceMeters=wheelDiamInches*Math.PI*0.0254; // 0.319185
     private double gearRatioDrive=8.1428; 
     // 1499  (3mps = 4695 rpm)
-    private double MPSToRPM = 60.0*gearRatioDrive/wheelCircumferenceMaters;  
+
+    // Convert velocity in meters/sec to RPM
+    private double MPSToRPM = 60.0*gearRatioDrive/wheelCircumferenceMeters;
+    
     // convert velocity in meters/sec to Talon speed unit (encoder counts/100ms)
     private double MPSToNativeSpeed = MPSToRPM*2048.0/600.0;  
+    
+    // Convert drive postion in native to meters
+    private double PosNativeUnitsToMeters = wheelCircumferenceMeters/(gearRatioDrive*2048);  
+
+
     // convert radians to encoder counts - 4096 counts per rotation
     private double RadiansToNativePos=4096.0/(2*Math.PI);
 
@@ -235,7 +243,7 @@ public void setMotorsAllStop() {
         return e_turn.getAbsolutePosition();
        }
 
-// get the turn velocity velocity, measured in rpm
+// get the turn motor velocity, measured in rpm
     public double getTurnVelocity() {
         return (m_turn.getSelectedSensorVelocity()*600/4096);
    }       
@@ -251,20 +259,20 @@ public void setMotorsAllStop() {
    }       
 
 
-// get the drive encoder position, measured in rotations
-     public double getDrivePosition() {
+// get the drive position, measured in rotations
+     public double getDrivePositionRotations() {
         return (m_drive.getSelectedSensorPosition()/2048.);
+       }
+
+// get the drive position, measured in meters
+     public double getDrivePositionMeters() {
+        return (2*m_drive.getSelectedSensorPosition()*PosNativeUnitsToMeters);
        }
 
 // get the drive encoder velocity, measured in rpm
      public double getDriveVelocity() {
         return  velNativeToRPM_talon(m_drive.getSelectedSensorVelocity());
        }
-
-// get voltage
-    public double getVoltage() {
-        return  m_drive.getMotorOutputVoltage();
-    }
     
 // get the drive encoder velocity, measured in rpm
     public double getDriveErrorRPM() {

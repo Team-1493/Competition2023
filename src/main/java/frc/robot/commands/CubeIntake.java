@@ -22,7 +22,7 @@ public class CubeIntake extends CommandBase {
   public void initialize() {
     m_ArmSubsystem.resetIntegralAccumulator();
     m_IntakeSystem.IntakeCube();
-
+    m_ArmSubsystem.motorActive=true;
 
   }
 
@@ -36,7 +36,6 @@ public class CubeIntake extends CommandBase {
   @Override
   public void end(boolean interrupted) {
     m_IntakeSystem.StopMotors();
-    m_ArmSubsystem.StopMotors();
   }
 
   // Returns true when the command should end.

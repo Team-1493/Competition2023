@@ -265,7 +265,7 @@ private void printModuleStates(){
 int i=0;
 while(i<4){
 // add whatever values you want to see
-  SmartDashboard.putNumber(moduleNames[i]+" Dpos",modules[i].getDrivePosition());            
+  SmartDashboard.putNumber(moduleNames[i]+" Dpos",modules[i].getDrivePositionRotations());            
   SmartDashboard.putNumber(moduleNames[i]+" Dvel",modules[i].getDriveVelocity()); 
   SmartDashboard.putNumber(moduleNames[i]+" TPos",modules[i].getTurnPosition_Deg());
   SmartDashboard.putNumber(moduleNames[i]+" TabsPos",modules[i].getTurnAbsPosition());
@@ -282,16 +282,16 @@ SmartDashboard.putNumber("PIDRotate Error",rotatePID.getPositionError());
 public SwerveModulePosition[] getModulePositions(){
   SwerveModulePosition[] positions = new SwerveModulePosition[4];
   positions[0]=new SwerveModulePosition(
-      modules[0].getDrivePosition(),
+      modules[0].getDrivePositionMeters(),
       new Rotation2d(modules[0].getTurnPosition_Rad())) ;
   positions[1]=new SwerveModulePosition(
-      modules[1].getDrivePosition(),
+      modules[1].getDrivePositionMeters(),
       new Rotation2d(modules[1].getTurnPosition_Rad())) ;
   positions[2]=new SwerveModulePosition(
-        modules[2].getDrivePosition(),
+        modules[2].getDrivePositionMeters(),
         new Rotation2d(modules[2].getTurnPosition_Rad())) ;
   positions[3]=new SwerveModulePosition(
-      modules[1].getDrivePosition(),
+      modules[1].getDrivePositionMeters(),
       new Rotation2d(modules[3].getTurnPosition_Rad())) ;
   return positions;
 }
