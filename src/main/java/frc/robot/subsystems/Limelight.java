@@ -7,35 +7,47 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Limelight extends SubsystemBase {
+  private double kPshootDist = 1;
   /** Creates a new ExampleSubsystem. */
-  public Limelight() {}
-  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-  NetworkTableEntry tx = table.getEntry("tx");//X
-  NetworkTableEntry ty = table.getEntry("ty");//Y
-  NetworkTableEntry ta = table.getEntry("ta");//Area
-  NetworkTableEntry tv = table.getEntry("tv");//bool target seen
-  NetworkTableEntry ts = table.getEntry("ts");//rotation
+  public Limelight() {
+    SmartDashboard.putNumber("kP Limelight Auto Shoot", kPshootDist);
+  }
+  NetworkTable Ftable = NetworkTableInstance.getDefault().getTable("limelight-front");
+  NetworkTableEntry Ftx = Ftable.getEntry("tx");//X
+  NetworkTableEntry Fty = Ftable.getEntry("ty");//Y
+  NetworkTableEntry Fta = Ftable.getEntry("ta");//Area
+  NetworkTableEntry Ftv = Ftable.getEntry("tv");//bool target seen
+  NetworkTableEntry Fts = Ftable.getEntry("ts");//rotation
+  NetworkTable Btable = NetworkTableInstance.getDefault().getTable("limelight-back");
+  NetworkTableEntry Btx = Btable.getEntry("tx");//X
+  NetworkTableEntry Bty = Btable.getEntry("ty");//Y
+  NetworkTableEntry Bta = Btable.getEntry("ta");//Area
+  NetworkTableEntry Btv = Btable.getEntry("tv");//bool target seen
+  NetworkTableEntry Bts = Btable.getEntry("ts");//rotation
  
-  public double[] getVisionTarget() {
+  public double[] getFrontLimelight() {
     double[] targetInfo = new double[5];
-    targetInfo[0] = tv.getDouble(0.0);//Target Seen
-    targetInfo[1] = tx.getDouble(0.0);//X
-    targetInfo[2] = ty.getDouble(0.0);//Y
-    targetInfo[3] = ta.getDouble(0.0);//Area
-    targetInfo[4] = ts.getDouble(0.0);//Rotation
+    targetInfo[0] = Ftv.getDouble(0.0);//Target Seen
+    targetInfo[1] = Ftx.getDouble(0.0);//X
+    targetInfo[2] = Fty.getDouble(0.0);//Y
+    targetInfo[3] = Fta.getDouble(0.0);//Area
+    targetInfo[4] = Fts.getDouble(0.0);//Rotation
+    return targetInfo;
+  }
+  public double[] getBackLimelight() {
+    double[] targetInfo = new double[5];
+    targetInfo[0] = Btv.getDouble(0.0);//Target Seen
+    targetInfo[1] = Btx.getDouble(0.0);//X
+    targetInfo[2] = Bty.getDouble(0.0);//Y
+    targetInfo[3] = Bta.getDouble(0.0);//Area
+    targetInfo[4] = Bts.getDouble(0.0);//Rotation
     return targetInfo;
   }
 
-  public void switchVision(Boolean type){
-    if(type){ // REFLECTIVE TAPE
-        NetworkTableInstance.getDefault().getTable("limelight").getEntry("<pipeline>").setNumber(0);
-    }
-    else{ // APRIL TAG
-        NetworkTableInstance.getDefault().getTable("limelight").getEntry("<pipeline>").setNumber(1);
-    }
-  }
+
 
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
@@ -49,7 +61,7 @@ public class Limelight extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Limelight Shoot Speed", kPshootDist/getFrontLimelight()[3]);
   }
 
   @Override

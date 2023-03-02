@@ -30,10 +30,10 @@ public class SwerveDrive extends SubsystemBase {
 
       
 public static SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-  new Translation2d(0.2131, -0.2105), 
   new Translation2d(0.2131, +0.2105), 
-  new Translation2d(-0.2131, -0.2105), 
-  new Translation2d(-0.2131, +0.2105));
+  new Translation2d(0.2131, -0.2105), 
+  new Translation2d(-0.2131, +0.2105), 
+  new Translation2d(-0.2131, -0.2105));
 
   public final Pigeon gyro = new Pigeon(20);
   public SwerveModuleState[] moduleStatesOptimized = new SwerveModuleState[4];
@@ -53,7 +53,7 @@ public static SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
     
 
     // Turn Module Offsets in degrees   FR-FL-BR-BL
-    double[] turnMotorZeroPos={-58.62,92.72,-114.08,78.22};
+    double[] turnMotorZeroPos={57.7,-85.4,117.2,-77.6};
 
     modules[0]=new SwerveModule("FR",2,1,11,
         turnMotorZeroPos[0]);
@@ -83,8 +83,8 @@ public static SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
   // then call set mootors to those speeds      StickState Array:  vx,vy,omega 
   public void setMotorsFromStick(double[] stickState ) {
     double vx=stickState[0]*maxVelocityMPS;
-    double vy=-stickState[1]*maxVelocityMPS;
-    double omega=-stickState[2];
+    double vy=stickState[1]*maxVelocityMPS;
+    double omega=stickState[2];
 
     if (Math.abs(omega)<0.001){
       if( !rotatePIDon) {
@@ -265,7 +265,7 @@ private void printModuleStates(){
 int i=0;
 while(i<4){
 // add whatever values you want to see
-  SmartDashboard.putNumber(moduleNames[i]+" Dpos",modules[i].getDrivePosition());            
+  SmartDashboard.putNumber(moduleNames[i]+" Dpos",modules[i].getDrivePositionRotations());            
   SmartDashboard.putNumber(moduleNames[i]+" Dvel",modules[i].getDriveVelocity()); 
   SmartDashboard.putNumber(moduleNames[i]+" TPos",modules[i].getTurnPosition_Deg());
   SmartDashboard.putNumber(moduleNames[i]+" TabsPos",modules[i].getTurnAbsPosition());
@@ -282,16 +282,16 @@ SmartDashboard.putNumber("PIDRotate Error",rotatePID.getPositionError());
 public SwerveModulePosition[] getModulePositions(){
   SwerveModulePosition[] positions = new SwerveModulePosition[4];
   positions[0]=new SwerveModulePosition(
-      modules[0].getDrivePosition(),
+      modules[0].getDrivePositionMeters(),
       new Rotation2d(modules[0].getTurnPosition_Rad())) ;
   positions[1]=new SwerveModulePosition(
-      modules[1].getDrivePosition(),
+      modules[1].getDrivePositionMeters(),
       new Rotation2d(modules[1].getTurnPosition_Rad())) ;
   positions[2]=new SwerveModulePosition(
-        modules[2].getDrivePosition(),
+        modules[2].getDrivePositionMeters(),
         new Rotation2d(modules[2].getTurnPosition_Rad())) ;
   positions[3]=new SwerveModulePosition(
-      modules[1].getDrivePosition(),
+      modules[1].getDrivePositionMeters(),
       new Rotation2d(modules[3].getTurnPosition_Rad())) ;
   return positions;
 }

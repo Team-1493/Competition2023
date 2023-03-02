@@ -40,7 +40,13 @@ public class FollowLimelight extends CommandBase {
 
   private double[] target;
 
-  public FollowLimelight(SwerveDrive sd, Limelight limelight) {
+  private double counter = 0;
+  private boolean counterBool;
+  private double desiredCounter = 50;
+  private Boolean horizontal;
+  private Boolean forward;
+
+  public FollowLimelight(SwerveDrive sd, Limelight limelight, Boolean horizontal, Boolean forward) {
     m_SwerveDrive = sd;
     m_limelight = limelight;
     SmartDashboard.putNumber("Limelight Rotation kP", kP_rotation);
@@ -84,22 +90,25 @@ public class FollowLimelight extends CommandBase {
   @Override
   public void execute() {
     currentHeading = m_SwerveDrive.heading;
-    target = m_limelight.getVisionTarget();
+    target = m_limelight.getFrontLimelight();
 
     rotation = RotPIDController.calculate(target[1]);//target[1]*kP_rotation;
-
-    forwardDistance = FDPIDController.calculate(desiredForwardDistance - target[3]);//(desiredForwardDistance - target[3])*kP_forwardDistance;
     
+    if (forward){
+      forwardDistance = FDPIDController.calculate(desiredForwardDistance - target[3]);//(desiredForwardDistance - target[3])*kP_forwardDistance;
+    }
     
-    if (Math.abs(currentHeading-0) > Math.abs(currentHeading-Math.PI)){
-      desiredHeading = 0;
+    if (horizontal){
+      if (Math.abs(currentHeading-0) > Math.abs(currentHeading-Math.PI)){
+        desiredHeading = 0;
+      }
+      else{
+        desiredHeading = Math.PI;
+      }
+  
+      desiredHeading=0;
+      sideDistance = (currentHeading-desiredHeading);
     }
-    else{
-      desiredHeading = Math.PI;
-    }
-
-    desiredHeading=0;
-    sideDistance = (currentHeading-desiredHeading);
 //    if (sideDistance>Math.PI){
 //      sideDistance = sideDistance - 2*Math.PI;
 //    }
@@ -124,7 +133,40 @@ public class FollowLimelight extends CommandBase {
 //      System.out.println("vx "+xVel+"  yvel "+yVel+"   rotation"+rotation);
       m_SwerveDrive.setMotors(xVel, yVel, rotation);
     }
+    if (horizontal){
+      if (Math.abs(target[1]) <= rotationCutOff && sideDistance <= sideDistanceCutOff){
+        if (forward){
+          if (desiredForwardDistance - target[3] <= forwardDistanceCutOff && forward){
+            counter += 1;
+          }
+          else{
+            counter = 0;
+          }
+        }
+        else{
+        counter += 1;
+        }
+      }
+      else{
+        counterBool = false;
+      }
+    }
+    else{
+      if (forward){
+        if (desiredForwardDistance - target[3] <= forwardDistanceCutOff && forward){
+          counter += 1;
+        }
+        else{
+          counter = 0;
+        }
+      }
+      else{
+        counter += 1;
+      }
+    }
 
+    
+    
   }
 
   // Called once the command ends or is interrupted.
@@ -136,12 +178,6 @@ public class FollowLimelight extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-/*    if (Math.abs(target[1]) <= rotationCutOff && desiredForwardDistance - target[3] <= forwardDistanceCutOff) {
-      counter += 1;
-    }
-    else{
-      counter = 0;
-    }*/
-    return false;
+    return counter >= desiredCounter;
   }
 }
