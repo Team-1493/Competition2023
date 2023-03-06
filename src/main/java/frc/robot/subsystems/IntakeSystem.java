@@ -144,6 +144,10 @@ public class IntakeSystem extends SubsystemBase {
     FrontIntakeBar.set(ControlMode.PercentOutput, frontIntakePower);
 }
 
+
+  public double getCurrent(){
+    return Math.max(FrontIntakeBar.getStatorCurrent(),RearIntakeBars.getStatorCurrent()); 
+  }
   public void GrabCone() {
       FrontIntakeBar.set(ControlMode.PercentOutput, frontIntakePower);
       RearIntakeBars.set(ControlMode.PercentOutput, -rearIntakePower);
